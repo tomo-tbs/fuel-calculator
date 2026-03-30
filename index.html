@@ -100,6 +100,23 @@
             border-left: 4px solid #007bff;
             padding-left: 8px;
         }
+        .toll {
+            display: flex;
+            gap: 5px;
+        }
+
+        .removeToll {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0 10px;
+            cursor: pointer;
+        }
+
+        .removeToll:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -136,9 +153,9 @@
     <div id="tollContainer">
         <div class="toll">
             <input type="number" class="tollInput">
+            <button type="button" class="removeToll">×</button>
         </div>
     </div>
-
     <button onclick="addToll()">＋高速代追加</button>
 </div>
 
@@ -180,17 +197,11 @@
 // 計算済みFlg
 let isCalculated = false;
 
-// 各項目にフォーカスが当たったら全選択状態にしておく
-document.querySelectorAll("input[type='number']").forEach(input => {
-    input.addEventListener("focus", function () {
-        if (!this.dataset.edited) {
-            this.select();
-        }
-    });
-
-    input.addEventListener("input", function () {
-        this.dataset.edited = true;
-    });
+// 各項目にフォーカスが当たったら全選択状態にする
+document.addEventListener("focusin", function (e) {
+    if (e.target.matches("input[type='number']")) {
+        setTimeout(() => e.target.select(), 0);
+    }
 });
 
 // 控除方式が切り替わったら,Inputの表示/非表示を切り替える
@@ -222,13 +233,47 @@ function setCalculatedState(flag) {
 }
 
 
+// 高速代入力エリア追加
 function addToll() {
     const container = document.getElementById("tollContainer");
+
     const div = document.createElement("div");
     div.className = "toll";
-    div.innerHTML = '<input type="number" class="tollInput">';
+
+    const input = document.createElement("input");
+    input.type = "number";
+    input.className = "tollInput";
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "removeToll";
+    btn.textContent = "×";
+
+    div.appendChild(input);
+    div.appendChild(btn);
     container.appendChild(div);
+
+    // フォーカス移動（スマホOK）
+    input.focus();
+    setTimeout(() => input.select(), 0);
 }
+
+// 高速代入力エリア削除
+document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("removeToll")) {
+
+        const toll = e.target.closest(".toll");
+        const container = document.getElementById("tollContainer");
+
+        // 1件は残す（UX的に）
+        if (container.children.length <= 1) {
+            toll.querySelector("input").value = "";
+            return;
+        }
+
+        toll.remove();
+    }
+});
 
 function calculate() {
     const people = parseInt(document.getElementById("people").value) || 0;
