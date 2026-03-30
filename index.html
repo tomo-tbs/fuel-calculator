@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<title>交通費割り勘計算</title>
+<meta name="description" content="ガソリン代と高速代を人数で割り勘計算">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <meta charset="UTF-8">
+    <title>交通費計算</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            max-width: 500px;
+        }
+        input {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 5px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 8px 12px;
+        }
+        .toll {
+            display: flex;
+            gap: 5px;
+        }
+        #people {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        #people label {
+            display: block;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #people input {
+            display: none;
+        }
+
+        #people input:checked + span,
+        #people label:has(input:checked) {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<h2>交通費計算</h2>
+
+<label>人数</label>
+<input type="number" id="people" min="2" max="10" value="2">
+
+<label>燃費 (km/L)</label>
+<input type="number" id="fuelEfficiency" step="0.1" value="20.0">
+
+<label>ガソリン代 (円/L)</label>
+<input type="number" id="gasPrice" value="150.0">
+
+<label>走行距離 (km)</label>
+<input type="number" id="distance" step="0.1" value="300">
+
+<label>高速代</label>
+<div id="tollContainer">
+    <div class="toll">
+        <input type="number" class="tollInput">
+    </div>
+</div>
+
+<button onclick="addToll()">＋高速代追加</button>
+
+<hr>
+
+<button onclick="calculate()">計算</button>
+
+<h3>結果</h3>
+<div id="result"></div>
+
+<script>
+function addToll() {
+    const container = document.getElementById("tollContainer");
+    const div = document.createElement("div");
+    div.className = "toll";
+    div.innerHTML = '<input type="number" class="tollInput">';
+    container.appendChild(div);
+}
+
+function calculate() {
+    const people = parseInt(document.getElementById("people").value) || 0;
+    const fuelEfficiency = parseFloat(document.getElementById("fuelEfficiency").value) || 0;
+    const gasPrice = parseInt(document.getElementById("gasPrice").value) || 0;
+    const distance = parseFloat(document.getElementById("distance").value) || 0;
+
+    // ガソリン代計算
+    const fuelCost = (distance / fuelEfficiency) * gasPrice;
+
+    // 高速代合計
+    const tollInputs = document.querySelectorAll(".tollInput");
+    let tollTotal = 0;
+    tollInputs.forEach(input => {
+        tollTotal += parseInt(input.value) || 0;
+    });
+
+    const total = fuelCost + tollTotal;
+    const perPerson = people > 0 ? total / people : 0;
+
+    document.getElementById("result").innerHTML = `
+        総額: ${Math.round(total)} 円<br>
+        1人あたり: ${Math.round(perPerson)} 円
+    `;
+}
+</script>
+
+</body>
+</html>
