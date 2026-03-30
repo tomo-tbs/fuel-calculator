@@ -418,8 +418,8 @@ let templates = [];
 // テンプレ読み込み
 // =======================
 async function loadTemplates() {
-    //const res = await fetch("templates.json");
-    //templates = await res.json();
+    const res = await fetch("templates.json");
+    templates = await res.json();
 
     //renderTemplateList();
     renderTemplateSelect();
@@ -488,6 +488,8 @@ function applyTemplateById(id) {
         const div = document.createElement("div");
         div.className = "toll";
         div.innerHTML = `<input type="number" class="tollInput" value="${val}">`;
+        div.innerHTML = `<input type="number" class="tollInput" placeholder="高速代">
+                         <button type="button" class="removeToll">×</button>`;
         container.appendChild(div);
     });
 
