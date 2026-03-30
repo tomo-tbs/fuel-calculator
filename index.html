@@ -100,22 +100,32 @@
             border-left: 4px solid #007bff;
             padding-left: 8px;
         }
+
         .toll {
             display: flex;
             align-items: center; /* 横並び＆縦中央揃え */
+            gap: 5px;
         }
 
         .toll input {
-            flex: 1;      /* 入力欄を横いっぱいに伸ばす */
-            width: auto;  /* 上位のwidth:100%を打ち消す */
-}
+            flex: 1;                 /* 入力欄を横いっぱいに伸ばす */
+            width: auto !important;  /* 上位の width:100% を打ち消す */
+            min-width: 0;            /* flexアイテム潰れ防止 */
+            box-sizing: border-box;  /* padding込みで幅を計算 */
+            margin-bottom: 0;        /* 下マージン削除 */
+            padding: 5px;            /* 必要に応じて調整 */
+            height: 36px;            /* ボタンと高さを揃える */
+        }
 
         .removeToll {
+            flex-shrink: 0;          /* 横幅潰れ防止 */
+            height: 36px;             /* 入力欄と高さ揃え */
+            line-height: 36px;        /* テキスト中央揃え */
+            padding: 0 12px;
+            border-radius: 6px;
             background: #dc3545;
             color: white;
             border: none;
-            border-radius: 6px;
-            padding: 0 10px;
             cursor: pointer;
         }
 
