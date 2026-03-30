@@ -90,11 +90,10 @@
 <h2>交通費計算</h2>
 
 <!-- テンプレ -->
-<label>テンプレート（クリックで入力）</label>
-<div id="templateList"></div>
-
-<!-- 今選択中のテンプレ（任意） -->
-<div id="currentTemplate" style="margin-top:5px; color:#666;"></div>
+<label>テンプレート</label>
+<select id="template" onchange="applyTemplate()">
+    <option value="">選択してください</option>
+</select>
 
 <hr>
 
@@ -154,6 +153,19 @@
 
 // 計算済みFlg
 let isCalculated = false;
+
+// 各項目にフォーカスが当たったら全選択状態にしておく
+document.querySelectorAll("input[type='number']").forEach(input => {
+    input.addEventListener("focus", function () {
+        if (!this.dataset.edited) {
+            this.select();
+        }
+    });
+
+    input.addEventListener("input", function () {
+        this.dataset.edited = true;
+    });
+});
 
 // 控除方式が切り替わったら,Inputの表示/非表示を切り替える
 document.getElementById("driverType").addEventListener("change", function () {
@@ -364,10 +376,27 @@ async function loadTemplates() {
     const res = await fetch("templates.json");
     templates = await res.json();
 
-    renderTemplateList();
+    //renderTemplateList();
+    renderTemplateSelect();
 }
 
+// loadイベントに登録
 window.addEventListener("load", loadTemplates);
+
+
+// =======================
+// テンプレ一覧（セレクタ）
+// =======================
+function renderTemplateSelect() {
+    const select = document.getElementById("template");
+
+    templates.forEach(t => {
+        const option = document.createElement("option");
+        option.value = t.id;
+        option.textContent = t.name;
+        select.appendChild(option);
+    });
+}
 
 // =======================
 // テンプレ一覧（ボタン）
@@ -391,6 +420,13 @@ function renderTemplateList() {
 // =======================
 // テンプレ適用
 // =======================
+function applyTemplate() {
+    const id = document.getElementById("template").value;
+
+    if (!id) return;
+
+    applyTemplateById(id);
+}
 function applyTemplateById(id) {
 
     const t = templates.find(x => x.id === id);
