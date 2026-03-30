@@ -83,59 +83,85 @@
             background: #007bff;
             color: white;
         }
+        .section {
+            margin-top: 24px;
+            padding: 15px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+            border-left: 4px solid #007bff;
+            padding-left: 8px;
+        }
     </style>
 </head>
 <body>
 
 <h2>交通費計算</h2>
 
-<!-- テンプレ -->
-<label>テンプレート</label>
-<select id="template" onchange="applyTemplate()">
-    <option value="">選択してください</option>
-</select>
+<!-- 基本情報 -->
+<div class="section">
+    <div class="section-title">基本情報</div>
 
-<hr>
+    <label>人数</label>
+    <input type="number" id="people" min="2" max="10" value="2">
 
-<label>人数</label>
-<input type="number" id="people" min="2" max="10" value="2">
+    <label>燃費 (km/L)</label>
+    <input type="number" id="fuelEfficiency" step="0.1" value="20.0">
 
-<label>燃費 (km/L)</label>
-<input type="number" id="fuelEfficiency" step="0.1" value="20.0">
+    <label>ガソリン代 (円/L)</label>
+    <input type="number" id="gasPrice" value="150.0">
+</div>
 
-<label>ガソリン代 (円/L)</label>
-<input type="number" id="gasPrice" value="150.0">
+<!-- 走行情報 -->
+<div class="section">
+    <div class="section-title">走行情報</div>
 
-<label>走行距離 (km)</label>
-<input type="number" id="distance" step="0.1" value="300">
+    <label>テンプレート</label>
+    <select id="template" onchange="applyTemplate()">
+        <option value="">選択してください</option>
+    </select>
 
-<label>高速代</label>
-<div id="tollContainer">
-    <div class="toll">
-        <input type="number" class="tollInput">
+    <label>走行距離 (km)</label>
+    <input type="number" id="distance" step="0.1" value="300">
+
+    <label>高速代</label>
+    <div id="tollContainer">
+        <div class="toll">
+            <input type="number" class="tollInput">
+        </div>
     </div>
+
+    <button onclick="addToll()">＋高速代追加</button>
 </div>
 
-<button onclick="addToll()">＋高速代追加</button>
+<!-- 計算オプション -->
+<div class="section">
+    <div class="section-title">計算オプション</div>
 
-<label>端数処理</label>
-<div id="roundingContainer">
-<select id="rounding">
-    <option value="1">端数なし</option>
-    <option value="100" selected>100円単位で切り上げ</option>
-    <option value="500">500円単位で切り上げ</option>
-    <option value="1000">1000円単位で切り上げ</option>
-</select>
-</div>
+    <label>端数処理</label>
+    <select id="rounding">
+        <option value="1">端数なし</option>
+        <option value="100" selected>100円単位で切り上げ</option>
+        <option value="500">500円単位で切り上げ</option>
+        <option value="1000">1000円単位で切り上げ</option>
+    </select>
 
-<label>ドライバー控除</label>
-<div id="driverTypeContainer">
-<select id="driverType">
-    <option value="none">なし</option>
-    <option value="fixed">固定額（円）</option>
-    <option value="percent">割合（％）</option>
-</select>
-<input type="number" id="driverValue" placeholder="金額 or 割合" style="display:none;">
+    <label>ドライバー控除</label>
+    <select id="driverType">
+        <option value="none">なし</option>
+        <option value="fixed">固定額（円）</option>
+        <option value="percent">割合（％）</option>
+    </select>
+
+    <input type="number" id="driverValue" placeholder="金額 or 割合" style="display:none;">
 </div>
 
 <hr>
