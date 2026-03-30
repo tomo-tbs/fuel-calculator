@@ -487,8 +487,7 @@ function applyTemplateById(id) {
     t.tolls.forEach(val => {
         const div = document.createElement("div");
         div.className = "toll";
-        div.innerHTML = `<input type="number" class="tollInput" value="${val}">`;
-        div.innerHTML = `<input type="number" class="tollInput" placeholder="高速代">
+        div.innerHTML = `<input type="number" class="tollInput" value="${val}" placeholder="高速代">
                          <button type="button" class="removeToll">×</button>`;
         container.appendChild(div);
     });
