@@ -102,8 +102,13 @@
         }
         .toll {
             display: flex;
-            gap: 5px;
+            align-items: center; /* 横並び＆縦中央揃え */
         }
+
+        .toll input {
+            flex: 1;      /* 入力欄を横いっぱいに伸ばす */
+            width: auto;  /* 上位のwidth:100%を打ち消す */
+}
 
         .removeToll {
             background: #dc3545;
@@ -117,6 +122,7 @@
         .removeToll:hover {
             background: #c82333;
         }
+        
     </style>
 </head>
 <body>
