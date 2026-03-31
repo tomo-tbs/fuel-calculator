@@ -250,24 +250,24 @@ document.addEventListener("click", function (e) {
 });
 
 function calculate() {
+
     const people = parseInt(document.getElementById("people").value) || 0;
     const fuelEfficiency = parseFloat(document.getElementById("fuelEfficiency").value) || 0;
     const gasPrice = parseInt(document.getElementById("gasPrice").value) || 0;
     const distance = parseFloat(document.getElementById("distance").value) || 0;
     const roundingUnit = parseInt(document.getElementById("rounding").value) || 1;
 
-
     if (people < 2) {
         alert("人数は2人以上にしてください");
         return;
     }
-    
+
     // ガソリン代計算
     let fuelCost = 0;
     if (fuelEfficiency > 0) {
         fuelCost = (distance / fuelEfficiency) * gasPrice;
     }
-    
+
     // 高速代合計
     const tollInputs = document.querySelectorAll(".tollInput");
     let tollTotal = 0;
@@ -277,7 +277,7 @@ function calculate() {
 
     const total = fuelCost + tollTotal;
 
-    // ===== ドライバー控除（固定 or 割合）=====
+    // ===== ドライバー控除 =====
     const driverType = document.getElementById("driverType").value;
     const driverValue = parseFloat(document.getElementById("driverValue").value) || 0;
 
@@ -288,7 +288,7 @@ function calculate() {
 
     if (driverType === "none") {
 
-        // 全員同じ
+        // 全員同じ（個別に切り上げ）
         const perPerson = Math.ceil(base / roundingUnit) * roundingUnit;
 
         driverPay = perPerson;
@@ -304,22 +304,21 @@ function calculate() {
             discount = base * (driverValue / 100);
         }
 
+        // ②③ 再配分
         driverPay = base - discount;
         otherPay = base + (discount / (people - 1));
 
-        if (driverPay < 0) driverPay = 0;
+        // マイナス防止
+        driverPay = Math.max(0, driverPay);
 
-        // 端数処理
+        // ④ 個別に切り上げ
         driverPay = Math.ceil(driverPay / roundingUnit) * roundingUnit;
-        otherPay = Math.ceil(otherPay / roundingUnit) * roundingUnit;
-
-        // ズレ補正
-        const adjustedTotal = driverPay + otherPay * (people - 1);
-        const diff = adjustedTotal - total;
-
-        driverPay -= diff;
+        otherPay  = Math.ceil(otherPay  / roundingUnit) * roundingUnit;
     }
 
+    // ===== 差額（＝ドライバー取り分）=====
+    const totalPaid = driverPay + otherPay * (people - 1);
+    const diff = totalPaid - total;
     // ===== 表示 =====
     document.getElementById("result").innerHTML = `
         総額: ${Math.round(total)} 円<br>
@@ -421,7 +420,9 @@ async function loadTemplates() {
     const res = await fetch("templates.json");
     templates = await res.json();
 
+    // ボタン形式の場合,こっち
     //renderTemplateList();
+    // セレクタ形式の場合,こっち
     renderTemplateSelect();
 }
 
