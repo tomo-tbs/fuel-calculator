@@ -107,6 +107,44 @@ button:disabled {
 .removeToll:hover {
     background: #c82333;
 }
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background: white;
+    margin: 10% auto;
+    padding: 15px;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 10px;
+}
+
+#templateResults div {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+#templateResults div:hover {
+    background: #007bff;
+    color: white;
+}
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.templateBtn {
+    margin-top: 0;      /* 既存のbuttonのmargin潰す */
+    width: auto;        /* 100%指定されてたら解除 */
+    white-space: nowrap; /* 改行防止 */
+}
 </style>
 </head>
 <body>
@@ -128,11 +166,19 @@ button:disabled {
 
 <!-- 走行情報 -->
 <div class="section">
+    <div class="section-header">
+        <div class="section-title">走行情報</div>
+        <button type="button" class="templateBtn" onclick="openTemplateDialog()">
+            テンプレートから設定
+        </button>
+    </div>
+    <!--
     <div class="section-title">走行情報</div>
     <label>テンプレート</label>
     <select id="template" onchange="applyTemplate()">
         <option value="">選択してください</option>
     </select>
+    -->
 
     <label>走行距離 (km)</label>
     <input type="number" id="distance" step="0.1" value="300">
@@ -176,6 +222,27 @@ button:disabled {
 <hr>
 <button class="calc-required" disabled onclick="share(true)">結果を共有</button>
 <button class="calc-required" disabled onclick="share(false)">結果をコピー</button>
+
+<div id="templateModal" class="modal">
+  <div class="modal-content">
+
+    <h3>テンプレ検索</h3>
+
+    <label>出発地</label>
+    <select id="startFilter" onchange="filterTemplates()">
+      <option value="">すべて</option>
+    </select>
+
+    <label>目的地</label>
+    <select id="goalFilter" onchange="filterTemplates()">
+      <option value="">すべて</option>
+    </select>
+
+    <div id="templateResults"></div>
+
+    <button onclick="closeTemplateDialog()">閉じる</button>
+  </div>
+</div>
 
 <script>
 
@@ -280,6 +347,21 @@ function calculate() {
     // ===== ドライバー控除 =====
     const driverType = document.getElementById("driverType").value;
     const driverValue = parseFloat(document.getElementById("driverValue").value) || 0;
+    
+    // 計算式
+    // 総ガソリン代 = 距離/燃費 * ガソリン代
+    // 総高速代 = SUM(高速代)
+    // 支払い総計 = 総ガソリン代 + 総高速代
+    
+    // 基本支払額は支払い総計 / 人数となる
+    
+    // ドライバー控除なしなら,均等割りを指定桁で切り上げた金額
+    
+    // ドライバー控除ありなら,ドライバーは(基本支払額 - 控除)を指定桁で切り上げた金額
+    // 他メンバーは基本支払額 + (控除 / ドライバー以外の人数)を指定桁で切り上げた金額
+    
+    // どちらの場合でも,切り上げによって発生する差額は集計担当者の取り分と想定
+    // (現在の使用シチュエーション的にはドライバーの取り分になる)
 
     // 基本額
     const base = total / people;
@@ -417,13 +499,18 @@ let templates = [];
 // テンプレ読み込み
 // =======================
 async function loadTemplates() {
+
     const res = await fetch("templates.json");
     templates = await res.json();
 
     // ボタン形式の場合,こっち
     //renderTemplateList();
     // セレクタ形式の場合,こっち
-    renderTemplateSelect();
+    //renderTemplateSelect();
+    
+    // Modalダイアログ軽視の場合,こっち
+    setupFilters();
+    renderTemplates(templates);
 }
 
 // loadイベントに登録
@@ -501,6 +588,86 @@ function applyTemplateById(id) {
     if (typeof setCalculatedState === "function") {
         setCalculatedState(false);
     }
+}
+
+// フィルタ選択肢作成
+function setupFilters() {
+    const starts = [...new Set(templates.map(t => t.start))];
+    const goals = [...new Set(templates.map(t => t.goal))];
+
+    const startSel = document.getElementById("startFilter");
+    const goalSel = document.getElementById("goalFilter");
+
+    starts.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        startSel.appendChild(opt);
+    });
+
+    goals.forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = g;
+        opt.textContent = g;
+        goalSel.appendChild(opt);
+    });
+}
+
+// フィルタ処理
+function filterTemplates() {
+    const start = document.getElementById("startFilter").value;
+    const goal = document.getElementById("goalFilter").value;
+
+    filtered = templates.filter(t => {
+        return (!start || t.start === start)
+            && (!goal || t.goal === goal);
+    });
+
+    renderTemplates(filtered);
+}
+
+// 描画
+function renderTemplates(list) {
+    const container = document.getElementById("templateResults");
+    container.innerHTML = "";
+
+    list.forEach(t => {
+        const div = document.createElement("div");
+        div.textContent = t.name;
+
+        div.onclick = () => applyTemplate(t);
+
+        container.appendChild(div);
+    });
+}
+
+// 適用
+function applyTemplate(t) {
+    document.getElementById("distance").value = t.distance;
+
+    const container = document.getElementById("tollContainer");
+    container.innerHTML = "";
+
+    t.tolls.forEach(v => {
+        const div = document.createElement("div");
+        div.className = "toll";
+        div.innerHTML = `
+            <input type="number" class="tollInput" value="${v}">
+            <button type="button" class="removeToll" onclick="this.parentNode.remove()">×</button>
+        `;
+        container.appendChild(div);
+    });
+
+    closeTemplateDialog();
+}
+
+// モーダル制御
+function openTemplateDialog() {
+    document.getElementById("templateModal").style.display = "block";
+}
+
+function closeTemplateDialog() {
+    document.getElementById("templateModal").style.display = "none";
 }
 
 </script>
