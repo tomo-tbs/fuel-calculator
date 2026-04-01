@@ -125,14 +125,33 @@ button:disabled {
 }
 
 #templateResults div {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: white;
     cursor: pointer;
+    transition: 0.2s;
 }
 
+/* ホバー（PC） */
 #templateResults div:hover {
     background: #007bff;
     color: white;
+    border-color: #007bff;
+}
+
+/* 押したとき */
+#templateResults div:active {
+    transform: scale(0.97);
+}
+
+/* スマホでも分かるように */
+#templateResults div::after {
+    content: "▶ 選択";
+    float: right;
+    font-size: 12px;
+    opacity: 0.6;
 }
 .section-header {
     display: flex;
@@ -227,7 +246,7 @@ button:disabled {
   <div class="modal-content">
 
     <h3>テンプレ検索</h3>
-
+    <p style="font-size:12px; opacity:0.7;">テンプレートを選択すると、距離と高速代が自動入力されます</p>
     <label>出発地</label>
     <select id="startFilter" onchange="filterTemplates()">
       <option value="">すべて</option>
@@ -500,8 +519,40 @@ let templates = [];
 // =======================
 async function loadTemplates() {
 
-    const res = await fetch("templates.json");
-    templates = await res.json();
+    templates = [
+  {
+    "id": "fukube_001",
+    "name": "フクベ(高岡砺波⇔ふくべの森駐車場)",
+    "distance": 360,
+    "tolls": [2650,2650],
+    "start": "高岡砺波",
+    "goal": "フクベ"
+  },
+  {
+    "id": "shirakawa_001",
+    "name": "白川(高岡砺波⇔高山⇔道の駅美濃白川)",
+    "distance": 370,
+    "tolls": [1580,1580],
+    "start": "高岡砺波",
+    "goal": "白川"
+  },
+  {
+    "id": "toyota_001",
+    "name": "豊田(高岡砺波⇔大田エリア駐車場)",
+    "distance": 500,
+    "tolls": [4490,4490],
+    "start": "高岡砺波",
+    "goal": "豊田"
+  },
+  {
+    "id": "ena_001",
+    "name": "恵那(高岡砺波⇔高山⇔大岩駐車場)",
+    "distance": 440,
+    "tolls": [1580,1580],
+    "start": "高岡砺波",
+    "goal": "恵那"
+  }
+];
 
     // ボタン形式の場合,こっち
     //renderTemplateList();
@@ -634,7 +685,6 @@ function renderTemplates(list) {
     list.forEach(t => {
         const div = document.createElement("div");
         div.textContent = t.name;
-
         div.onclick = () => applyTemplate(t);
 
         container.appendChild(div);
