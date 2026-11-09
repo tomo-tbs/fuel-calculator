@@ -533,10 +533,11 @@ window.addEventListener("load", () => {
 
     // 人数（ラジオ）
     const people = params.get("p");
-    if (people) {
-        const radio = document.querySelector(`input[name="people"][value="${people}"]`);
-        if (radio) radio.checked = true;
-    }
+    //if (people) {
+    //    const radio = document.querySelector(`input[name="people"][value="${people}"]`);
+    //    if (radio) radio.checked = true;
+    //}
+    document.getElementById("people").value = params.get("p") || "";
 
     document.getElementById("fuelEfficiency").value = params.get("fe") || "";
     document.getElementById("gasPrice").value = params.get("gp") || "";
@@ -569,7 +570,8 @@ window.addEventListener("load", () => {
 
 function share(isShare) {
 
-    const people = document.querySelector('input[name="people"]:checked')?.value;
+    //const people = document.querySelector('input[name="people"]:checked')?.value;
+    const people = document.getElementById("people").value;
     const fuelEfficiency = document.getElementById("fuelEfficiency").value;
     const gasPrice = document.getElementById("gasPrice").value;
     const distance = document.getElementById("distance").value;
@@ -643,6 +645,14 @@ async function loadTemplates() {
     "tolls": [1580,1580],
     "start": "高岡砺波",
     "goal": "恵那"
+  },
+  {
+    "id": "mizu_001",
+    "name": "瑞牆(大沢野⇔安房⇔釜瀬橋駐車場)",
+    "distance": 445,
+    "tolls": [4400],
+    "start": "大沢野",
+    "goal": "瑞牆"
   }
 ];
 
